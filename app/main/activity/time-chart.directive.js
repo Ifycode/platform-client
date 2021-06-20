@@ -11,37 +11,13 @@ function ActivityTimeChart() {
     };
 }
 
-ActivityTimeChartController.$inject = ['$scope', '$translate', 'PostEndpoint', 'd3', 'Chartist', 'frappe', '_', 'PostFilters'];
-function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chartist, frappe, _, PostFilters) {
+ActivityTimeChartController.$inject = ['$scope', '$translate', 'PostEndpoint', 'd3', 'Chartist', 'ChartistTooltip', 'frappe', '_', 'PostFilters'];
+function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chartist, ChartistTooltip, frappe, _, PostFilters) {
 
-    /*
-    $scope.frappeData = {
-        labels: ["12am-3am", "3am-6pm", "6am-9am", "9am-12am",
-            "12pm-3pm", "3pm-6pm", "6pm-9pm", "9am-12am"
-        ],
-        datasets: [
-            {
-                name: "Some Data", type: "bar",
-                values: [25, 40, 30, 35, 8, 52, 17, -4]
-            },
-            {
-                name: "Another Set", type: "line",
-                values: [25, 50, -10, 15, 18, 32, 27, 14]
-            }
-        ]
-    }
-    const chart = new frappe.Chart("#chart", {  // or a DOM element,
-                                                // new Chart() in case of ES6 module with above usage
-        title: "My Awesome Chart",
-        data: $scope.frappeData,
-        type: 'axis-mixed', // or 'bar', 'line', 'scatter', 'pie', 'percentage'
-        height: 250,
-        colors: ['#7cd6fd', '#743ee2']
-    });*/
+    //===== FRAPPE ======
 
-    /*
     $scope.frappeData = {
-        labels: [],
+        labels: ['Sun', 'Mon', 'Tue', 'Wed'],
         datasets: [
             {
                 name: 'Draft', type: 'line',
@@ -54,8 +30,7 @@ function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chart
         ]
     }
 
-    const chart = new frappe.Chart('#chart', {  // or a DOM element,
-        // new Chart() in case of ES6 module with above usage
+    const chart = new frappe.Chart('#chart', {
         title: 'My Awesome Chart',
         data: $scope.frappeData,
         type: 'axis-mixed', // or 'bar', 'line', 'scatter', 'pie', 'percentage'
@@ -65,61 +40,46 @@ function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chart
         },
         colors: ['#7cd6fd', '#743ee2']
     });
-    */
 
 
 
-    //========== Chartist =====================
-    /*$scope.chartistData = {
-        series: [
-            {
-              name: 'series-1',
-              data: [
-                {x: new Date(143134652600), y: 53},
-                {x: new Date(143234652600), y: 40},
-                {x: new Date(143340052600), y: 45},
-                {x: new Date(143366652600), y: 40},
-                {x: new Date(143410652600), y: 20},
-                {x: new Date(143508652600), y: 32},
-                {x: new Date(143569652600), y: 18},
-                {x: new Date(143579652600), y: 11}
-              ]
-            },
-            {
-              name: 'series-2',
-              data: [
-                {x: new Date(143134652600), y: 53},
-                {x: new Date(143234652600), y: 35},
-                {x: new Date(143334652600), y: 30},
-                {x: new Date(143384652600), y: 30},
-                {x: new Date(143568652600), y: 10}
-              ]
-            }
-          ]
-        }, {
-          axisX: {
-            type: Chartist.FixedScaleAxis,
-            divisor: 5,
-            labelInterpolationFnc: function(value) {
-              return moment(value).format('MMM D');
-            }
-          },
-        // A labels array that can contain any sort of values
-        labels: ['13 Oct 2020', '6 Jan 2021', '1 Jun 2021'],
-        // Our series array that contains series objects or in this case series data arrays
-        series: [
-          [4, 2, 3]
-        ]
-      };*/
+    //===== CHARTIST ======
 
-
-
-    $scope.chartistData =  {
+    $scope.chartistData = {
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         series: [
-            [12, 9, 7, 8, 5],
-            [2, 1, 3.5, 7, 3],
-            [1, 3, 4, 5, 6]
+            //[2, 3, 5, 7],
+            //[1, 2],
+            [
+                { meta: 'description', value: 2 },
+                { meta: 'description', value: 3 },
+                { meta: 'description', value: 5 },
+                { meta: 'description', value: 7 }
+            ],
+            [
+                { meta: 'description', value: 1 },
+                { meta: 'description', value: 2 }
+            ]
+
+            /* trying out date
+            {
+                name: 'draft',
+                data: [
+                  {x: new Date(143134652600), y: 2},
+                  {x: new Date(143234652600), y: 3},
+                  {x: new Date(143340052600), y: 5},
+                  {x: new Date(143366652600), y: 7},
+                  {x: new Date(143410652600), y: 8},
+                  {x: new Date(143508652600), y: 9}
+                ]
+            },
+            {
+                name: 'published',
+                data: [
+                  {x: new Date(143134652600), y: 1},
+                  {x: new Date(143234652600), y: 2}
+                ]
+            }*/
         ]
     };
 
@@ -131,38 +91,46 @@ function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chart
         lineSmooth: false,
         // As this is axis specific we need to tell Chartist to use whole numbers only on the concerned axis
         axisY: {
-            onlyInteger: true//,
-            //offset: 0
-        }
+            onlyInteger: true/*,
+            offset: 0*/
+        },
+        plugins: [
+
+            ChartistTooltip({
+                appendToBody: true
+            }) /* Not able to get any plugins to work,
+            Chartist.plugins.ctAxisTitle({
+              axisX: {
+                axisTitle: 'Time (mins)',
+                axisClass: 'ct-axis-title',
+                offset: {
+                  x: 0,
+                  y: 50
+                },
+                textAnchor: 'middle'
+              },
+              axisY: {
+                axisTitle: 'Goals',
+                axisClass: 'ct-axis-title',
+                offset: {
+                  x: 0,
+                  y: 0
+                },
+                textAnchor: 'middle',
+                flipTitle: false
+              }
+            })*/
+        ]
     }
-
-    /*
-
-    $scope.chartistData = {
-        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            series: [
-                [12, 9, 7, 8, 5],
-                [2, 1, 3.5, 7, 3],
-                [1, 3, 4, 5, 6]
-            ]
-    }, {
-        fullWidth: true,
-            chartPadding: {
-            right: 40
-        }
-    };*/
-
-    /*$scope.chartistOptions = {
-        width: 400,
-        height: 250
-    };*/
 
     // Create a new line chart object where as first parameter we pass in a selector
     // that is resolving to our chart container element. The Second parameter
     // is the actual data object.
     new Chartist.Line('.ct-chart', $scope.chartistData, $scope.chartistOptions);
 
-      //==========================================================
+
+    //===== D3 ======
+
     var yAxisLabelCumulative = $translate.instant('graph.cumulative_post_count'),
         yAxisLabel = $translate.instant('graph.new_post_count'),
         xAxisLabel = $translate.instant('graph.post_date');
@@ -226,36 +194,6 @@ function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chart
         }
     };
 
-    $scope.frappeData = {
-        labels: ['Sun', 'Mon', 'Tue', 'Wed'],
-        datasets: [
-            {
-                name: 'Draft', type: 'line',
-                values: [2, 3, 5, 7]
-            },
-            {
-                name: 'Published', type: 'line',
-                values: [1, '', '', 2]
-            }
-        ],
-        yMarkers: [{ label: 'Marker', value: 70 }],
-
-        yRegions: [{ label: 'Region', start: -10, end: 50 }]
-    }
-
-    const chart = new frappe.Chart('#chart', {  // or a DOM element,
-        // new Chart() in case of ES6 module with above usage
-        title: 'My Awesome Chart',
-        data: $scope.frappeData,
-        type: 'axis-mixed', // or 'bar', 'line', 'scatter', 'pie', 'percentage'
-        height: 350,
-        lineOptions: {
-            dotSize: 6 // default: 4
-        },
-        colors: ['#7cd6fd', '#743ee2']
-    });
-
-
     $scope.reload = getPostStats;
 
     activate();
@@ -288,7 +226,24 @@ function ActivityTimeChartController($scope, $translate, PostEndpoint, d3, Chart
                 }];
             } else {
                 $scope.data = results.totals;
+                console.log($scope.data);
+
+                let getDataSet = $scope.data.map(dt => {
+                    return {
+                        name: dt.key,
+                        type: 'line',
+                        values: dt.values.map(d => d.cumulative_total)}
+                });
+
+                console.log(getDataSet);
+
+                $scope.frappeData = {
+                    labels: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'], //dummy data
+                    datasets: getDataSet
+                }
             }
+
+            chart.update($scope.frappeData);
             $scope.isLoading = false;
         });
     }

@@ -165,6 +165,12 @@ angular.module('app',
     .factory('Chartist', function () {
         return require('chartist');
     })
+    .factory('ChartistTooltip', function () {
+        return require('chartist-plugin-tooltips-updated');
+    })
+    .factory('ChartistTooltip', function () {
+        return require('chartist-plugin-tooltips-updated');
+    })
     .factory('frappe', function () {
         return require('frappe-charts/dist/frappe-charts.min.cjs');
     })
